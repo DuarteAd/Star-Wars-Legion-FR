@@ -1,0 +1,49 @@
+{
+  "Object": {
+    "GUID": "471c43",
+    "Name": "Custom_Assetbundle",
+    "Transform": {
+      "posX": 47.801693,
+      "posY": 0.945453763,
+      "posZ": 19.0863533,
+      "rotX": 0.0000263690654,
+      "rotY": 270.008545,
+      "rotZ": 0.0000161136049,
+      "scaleX": 0.7750004,
+      "scaleY": 0.7750004,
+      "scaleZ": 0.7750004
+    },
+    "Nickname": "Unit ID Token",
+    "Description": "Right Click > States to access different Unit ID",
+    "GMNotes": "",
+    "ColorDiffuse": {
+      "r": 1,
+      "g": 1,
+      "b": 1
+    },
+    "LayoutGroupSortIndex": 0,
+    "Locked": false,
+    "Grid": true,
+    "Snap": true,
+    "IgnoreFoW": false,
+    "MeasureMovement": false,
+    "DragSelectable": true,
+    "Autoraise": true,
+    "Sticky": true,
+    "Tooltip": true,
+    "GridProjection": false,
+    "HideWhenFaceDown": false,
+    "Hands": false,
+    "CustomAssetbundle": {
+      "AssetbundleURL": "http://cloud-3.steamusercontent.com/ugc/1803106576260862245/453B285C44220D66DB6893E01074F2B642AE1683/",
+      "AssetbundleSecondaryURL": "",
+      "MaterialIndex": 0,
+      "TypeIndex": 0,
+      "LoopingEffectIndex": 0
+    },
+    "LuaScript": "",
+    "LuaScriptState": "",
+    "XmlUI": ""
+  },
+  "StatesPaths": {}
+}

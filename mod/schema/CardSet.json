@@ -1,0 +1,37 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "$id": "https://schema.swlegion.dev/CardSet.json",
+
+  "title": "Set of cards.",
+  "description": "Definitions of unit, upgrade, commmand, and battle cards.",
+
+  "type": "object",
+  "additionalProperties": false,
+
+  "properties": {
+    "units": {
+      "type": "object"
+    },
+
+    "upgrades": {
+      "$ref": "./deps/UpgradeCardSet.json"
+    },
+
+    "commands": {
+      "$ref": "./deps/CommandCardSet.json"
+    },
+
+    "battlefield": {
+      "$ref": "./deps/BattleCardSet.json"
+    },
+
+    "objects": {
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "./deps/GenericObject.json"
+      }
+    }
+  },
+
+  "required": ["units", "upgrades", "commands", "battlefield"]
+}

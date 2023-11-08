@@ -1,0 +1,40 @@
+{
+  // Formatting.
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "[javascript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[json]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[typescript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "editor.codeActionsOnSave": {
+    "source.fixAll": true,
+    "source.fixAll.eslint": true,
+    "source.fixAll.tslint": true,
+    "source.organizeImports": true
+  },
+  "editor.formatOnSave": true,
+  "prettier.ignorePath": ".gitignore",
+  "files.eol": "\n",
+  "files.insertFinalNewline": true,
+
+  // Linting.
+  "eslint.validate": ["javascript", "json", "typescript"],
+  "eslint.lintTask.enable": true,
+  "editor.tabSize": 2,
+  "files.associations": {
+    "*.ttslua": "lua"
+  },
+  "editor.detectIndentation": false,
+
+  // Schemas.
+  "json.schemas": [
+    {
+      "fileMatch": ["contrib/cards/*.json"],
+      "url": "/mod/schema/CardSet.json"
+    }
+  ]
+}

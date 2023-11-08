@@ -1,0 +1,23 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "$id": "https://schema.swlegion.dev/deps/UpgradeCardSet.json",
+
+  "title": "A collection of Upgrade Cards.",
+  "description": "A set of upgrade cards, by type.",
+
+  "additionalProperties": {
+    "type": "array",
+    "items": {
+      "$ref": "./UpgradeCard.json"
+    }
+  },
+
+  "propertyNames": {
+    "anyOf": [
+      { "$ref": "./Upgrades.json" },
+      { "type": "string", "minLength": 1 }
+    ]
+  },
+
+  "type": "object"
+}

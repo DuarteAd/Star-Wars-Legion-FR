@@ -1,0 +1,49 @@
+{
+  "Object": {
+    "GUID": "feaddb",
+    "Name": "Custom_Assetbundle",
+    "Transform": {
+      "posX": 47.801693,
+      "posY": 0.945453763,
+      "posZ": 19.0863533,
+      "rotX": -0.0000293464473,
+      "rotY": 270.008545,
+      "rotZ": 0.00001858767,
+      "scaleX": 0.7750004,
+      "scaleY": 0.7750004,
+      "scaleZ": 0.7750004
+    },
+    "Nickname": "Unit ID Token",
+    "Description": "Right Click > States to access different Unit ID",
+    "GMNotes": "",
+    "ColorDiffuse": {
+      "r": 1,
+      "g": 1,
+      "b": 1
+    },
+    "LayoutGroupSortIndex": 0,
+    "Locked": false,
+    "Grid": true,
+    "Snap": true,
+    "IgnoreFoW": false,
+    "MeasureMovement": false,
+    "DragSelectable": true,
+    "Autoraise": true,
+    "Sticky": true,
+    "Tooltip": true,
+    "GridProjection": false,
+    "HideWhenFaceDown": false,
+    "Hands": false,
+    "CustomAssetbundle": {
+      "AssetbundleURL": "http://cloud-3.steamusercontent.com/ugc/1803106576260862585/26A3FC743C17B684CDA1A02F917203DD2D8D7B8B/",
+      "AssetbundleSecondaryURL": "",
+      "MaterialIndex": 0,
+      "TypeIndex": 0,
+      "LoopingEffectIndex": 0
+    },
+    "LuaScript": "",
+    "LuaScriptState": "",
+    "XmlUI": ""
+  },
+  "StatesPaths": {}
+}

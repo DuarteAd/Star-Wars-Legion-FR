@@ -1,0 +1,17 @@
+{
+    "version": "0.1",
+    "language": "en",
+    "ignorePaths": [
+        "contrib/**",
+        "*.json",
+        ".vscode/*.json"
+    ],
+    "words": [
+        "assetbundle",
+        "Donge",
+        "lucasfilm",
+        "marvinpinto",
+        "Mbweha",
+        "ttslua"
+    ]
+}

@@ -1,0 +1,279 @@
+-- Utilities around creating and managing minis.
+Shelf = {}
+Shelf.__index = Shelf;
+function Shelf:create()
+  local meta = {
+    -- TODO: Have the schema be configurable.
+    _colliders = {
+      small    = { "http://cloud-3.steamusercontent.com/ugc/1009315641457429932/1534D6C1AA4F3D5BDA469241B8F0319BE560E7ED/", 1.06299},
+      medium   = { "http://cloud-3.steamusercontent.com/ugc/1009315641457670521/DAD6653F422046BD6BC4360FE18C96927D5F4C44/", 1.9685},
+      large    = { "http://cloud-3.steamusercontent.com/ugc/1009315641457670155/6727179496A9F397E953AAA3268C6CC6444598DF/", 2.75591},
+      huge     = { "http://cloud-3.steamusercontent.com/ugc/1009315641457669798/3B337900892D839BDBC3EBF2A5CC9EC87DDBFED1/", 3.93701},
+      laat     = { "http://cloud-3.steamusercontent.com/ugc/1924743543116123549/A96493C7DF407D0E68F17FDF360AEEFA07BFAEB9/", 4.72440 },
+      epic     = { "http://cloud-3.steamusercontent.com/ugc/1009315641457669292/A7F6F75580BF1DFAA23E621875A761FB8B9EF2BC/", 5.90551},
+      long     = { "http://cloud-3.steamusercontent.com/ugc/963116666702885485/70F17B3327115A379D06F81C6F47F76470D7B826/", 6.88976},
+      snail    = { "http://cloud-3.steamusercontent.com/ugc/1924743543116106403/74B762E5395F42575CE13125BC944ACDF823246B/", 7.87402}
+    },
+    _unknown   = {
+      -- TODO: Add stand-ins.
+    },
+    _cache     = {
+      -- objects  = {},
+    }
+  }
+  setmetatable(meta, Shelf)
+  return meta
+end
+
+function Shelf:_getSchema()
+  return Global.getTable("CardsSchema")
+end
+
+function Shelf:spawnUnitModels(params)
+  -- Standard parameters (required).
+  local faction = params.faction
+  local name = params.name
+  local upgrades = params.upgrades
+
+  -- Optional parameters.
+  local callback = params.callback
+  local additional = params.additional
+
+  local additionalObjects = {}
+
+  -- TODO: Remove remapping.
+  local remap = {
+    ["rebel"]      = "Rebel",
+    ["imperial"]   = "Empire",
+    ["separatist"] = "Separatist",
+    ["republic"]   = "Republic",
+  }
+  if remap[faction] ~= nil then
+    faction = remap[faction]
+  end
+  local units = self:_getSchema().units[faction:upper()]
+  if units == nil then
+    local model = self:_spawnDudModel(name, "No matching faction found: \"" .. faction .. "\".")
+    if callback ~= nil then
+      callback(model, 1, self._colliders.small[2])
+    end
+    return {model}
+  end
+  local card = units[name:upper()]
+  if card == nil then
+    local model = self:_spawnDudModel(name, "No matching unit found.\nFaction: \"" .. faction .. "\".")
+    if callback ~= nil then
+      callback(model, 1, self._colliders.small[2])
+    end
+    return {model}
+  end
+  local size = self._colliders[card.size][2]
+  local minis = card.minis
+  if type(minis) == "number" then
+    print("Spawning placeholder minis is not yet implemented (" .. name .. ": " .. tostring(minis) .. ")")
+    return {}
+  end
+  local result = {}
+  for _, upgradeName in ipairs(upgrades) do
+    local upgrade = self:_fetchUpgradeByName(upgradeName)
+    -- TODO: Handle missing upgrade more gracefully.
+    if upgrade ~= nil then
+      if additional and upgrade.additionalObjects then
+        for _, name in ipairs(upgrade.additionalObjects) do
+          table.insert(additionalObjects, name)
+        end
+      end
+      if upgrade.mini ~= nil and (upgrade.leader == true or card.heavyWeaponTeam == true) then
+        local model = self:_spawnModel(card.size, upgrade.mini)
+        model.setName(upgrade.name .. " (Unit Leader)")
+        table.insert(result, model)
+        if callback ~= nil then
+          callback(model, #result, size)
+        end
+        break
+      end
+    end
+  end
+  for _, config in pairs(minis) do
+    local model = self:_spawnModel(card.size, config)
+    table.insert(result, model)
+    if #result == 1 then
+      model.setName(name .. " (Unit Leader)")
+    else
+      model.setName(name)
+    end
+    if callback ~= nil then
+      callback(model, #result, size)
+    end
+  end
+  for _, upgradeName in ipairs(upgrades) do
+    local upgrade = self:_fetchUpgradeByName(upgradeName)
+    -- TODO: Handle missing upgrade more gracefully.
+    if upgrade ~= nil then
+      if upgrade.mini ~= nil and upgrade.leader ~= true and card.heavyWeaponTeam ~= true then
+        local model = self:_spawnModel(card.size, upgrade.mini)
+        model.setName(upgrade.name)
+        table.insert(result, model)
+        if callback ~= nil then
+          callback(model, #result, size)
+        end
+      end
+    end
+  end
+  if additional and additional.position then
+    for _, name in ipairs(card.additionalObjects or {}) do
+      table.insert(additionalObjects, name)
+    end
+    -- Spawn additional objects attached to unit or upgrade cards.
+    if #additionalObjects > 0 or additional.callback then
+      self:spawnAdditionalObjects({
+        name     = card.name .. "'s Objects",
+        position = additional.position,
+        rotation = additional.rotation,
+        callback = additional.callback,
+        objects  = additionalObjects,
+        -- TODO: Make this global somehow instead.
+        scripts  = params.scripts,
+      })
+    end
+  end
+  return {
+    rank   = card.rank,
+    speed  = card.speed,
+    size   = card.size,
+    height = card.height or 2,
+    models = result,
+    tokens = card.tokens
+  }
+end
+
+function Shelf:spawnAdditionalObjects(params)
+  local name     = params.name or "Additional Objects"
+  local position = params.position
+  local rotation = params.rotation
+  local objects  = params.objects or {}
+  local callback = params.callback
+  spawnObject({
+    type              = "Bag",
+    position          = position,
+    rotation          = rotation,
+    callback_function = function(spawnedBag)
+      for _, object in ipairs(objects) do
+        self:_spawnComplimentaryObject(object, spawnedBag, params.scripts or {})
+      end
+      if callback then
+        callback(spawnedBag)
+      end
+      spawnedBag.setName(name)
+    end
+  })
+end
+
+function Shelf:_spawnComplimentaryObject(name, container, scripts)
+  if not self._cache.objects then
+    local cache = {}
+    for name, details in pairs(self._getSchema().objects) do
+      cache[name:upper()] = details
+    end
+    self._cache.objects = cache
+  end
+  local spawn = self._cache.objects[name:upper()]
+  local object
+  if spawn.token then
+    object = self:_spawnModel(nil, spawn.token, { type = 5 })
+    object.setName(spawn.token.name or name)
+  elseif spawn.model then
+    object = self:_spawnModel(nil, spawn.model)
+    object.setName(name)
+  elseif spawn.cards then
+    for i = 1, spawn.multiples or 1 do
+      for _, details in ipairs(spawn.cards) do
+        local back = details.back or spawn.back
+        local card = self:_spawnCard(details.image, back)
+        card.setName(details.name)
+        container.putObject(card)
+      end
+    end
+  else
+    print("Unsupported object definition: \"" .. name .. "\" (" .. container.getName() .. ")")
+  end
+  if object then
+    if spawn.scripted then
+      local luaScript = scripts[spawn.scripted]
+      object.setLuaScript(luaScript)
+      object = object.reload()
+    end
+    container.putObject(object)
+  end
+end
+
+function Shelf:_spawnCard(front, back)
+  local custom = spawnObject({
+    type     = "CardCustom",
+    position = {54.62, 0.94, -35.45},
+    scale    = {0.83, 1, 0.83},
+  })
+  -- Failsafe to avoid a `nil` error.
+  if back == nil then
+    back = front
+  end
+  custom.setCustomObject({
+    face     = front,
+    back     = back,
+  })
+  return custom
+end
+
+function Shelf:_fetchUpgradeByName(name)
+  -- TODO: Remove remapping.
+  local remap = {
+    ["Battle Shield Wookiee"]        = "Battle Shield Wookiee (Offensive)",
+    ["C-3PO Human-Cyborg Relations"] = "C-3PO",
+    ["C-3PO Made to Suffer"]         = "C-3PO",
+  }
+  if remap[name] ~= nil then
+    name = remap[name]
+  end
+  return self:_getSchema().upgrades[name:upper()]
+end
+
+function Shelf:_spawnDudModel(name, description)
+  local model = self:_spawnModel("small", {
+    bundle = "http://cloud-3.steamusercontent.com/ugc/1616219505081638790/1BF43B61B14CFD7C588AF6C59972B092674D6C8F/",
+  })
+  model.setName(name)
+  model.setDescription(description)
+  return model
+end
+
+function Shelf:_spawnModel(size, miniConfig, objectOverrides)
+  local mini
+  local type = objectOverrides and objectOverrides.type or 1
+  if miniConfig.mesh == nil then
+    mini = spawnObject({
+      type = "Custom_AssetBundle"
+    })
+    mini.setCustomObject({
+      assetbundle = miniConfig.bundle,
+      assetbundle_secondary = miniConfig.secondary,
+      type = type,
+      material = 3,
+    })
+  else
+    local collider = miniConfig.collider
+    if not collider and size then
+      collider = self._colliders[size][1]
+    end
+    mini = spawnObject({
+      type = "Custom_Model"
+    })
+    mini.setCustomObject({
+      diffuse = miniConfig.diffuse,
+      mesh = miniConfig.mesh,
+      collider = collider,
+      type = type,
+      material = 3,
+    })
+  end
+  return mini
+end

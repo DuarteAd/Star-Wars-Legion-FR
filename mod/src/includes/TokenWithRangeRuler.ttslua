@@ -1,0 +1,55 @@
+require('!/RangeRulers')
+
+-- each token must define 'rangeKey' with key listed below
+
+-- Token keys in RangeRulers Table
+-- smokeToken = 18.8mm diameter (range 1)
+-- token = 25.1mm diameter (range 1)
+
+function onLoad()
+  rangeOn = false
+  createButton({0, 0, 0})
+  createButton({0, 0, 180})
+end
+
+function createButton(rotation)
+  self.createButton({
+    click_function = "toggleRangeRuler",
+    function_owner = self,
+    label = "R",
+    tooltip = "Spawn Range Ruler",
+    position = {0, 0.1, 0.7},
+    rotation = rotation,
+    scale = {0.5, 0.5, 0.5},
+    width = 400,
+    height = 300,
+    font_size = 200,
+    color = {0, 0, 0, 1},
+    font_color = {0.1212, 0.8127, 0, 1}
+  })
+end
+
+function onDestroy()
+  clearRangeRuler()
+end
+
+function toggleRangeRuler()
+  clearRangeRuler()
+  rangeOn = not rangeOn
+  if rangeOn then
+    spawnTokenRangeRuler()
+  end
+end
+
+function clearRangeRuler()
+  if rangeRuler then
+    destroyObject(rangeRuler)
+    rangeRuler = nil
+  end
+end
+
+function spawnTokenRangeRuler()
+  local rangeRulerTable = getRangeRulerLinks()
+  local tokenRulerBundle = rangeRulerTable[rangeKey]
+  spawnRangeRuler(self, tokenRulerBundle)
+end

@@ -1,0 +1,82 @@
+require('!/data/RangeRulerLinks')
+
+function showRangeOnHoveredModel(hoverObject)
+  clearRangeRulers()
+  if hoverObject then
+    if hoverObject.interactable then
+      if selectedUnitObj == hoverObject then
+        selectedUnitObj = nil
+        return
+      else
+        spawnRangeRuler(hoverObject)
+        selectedUnitObj = hoverObject
+      end
+    end
+  else
+    selectedUnitObj = nil
+  end
+end
+
+-- Refactor this to work with the refactored spawnRangeRuler()
+function clearRangeRulers()
+  if rangeRuler ~= nil then
+    destroyObject(rangeRuler)
+    rangeRuler = nil
+  end
+
+  noRulers = true
+end
+
+
+function spawnRangeRuler(rangeSourceObject, projectorBundleOverride)
+  if rangeSourceObject == nil then 
+    return 
+  end
+
+  local rulerBundleToSpawn = ""
+
+  if projectorBundleOverride ~= nil then
+    rulerBundleToSpawn = projectorBundleOverride
+  else
+    -- Get unit data from leader if leader hovered
+    local unitData = rangeSourceObject.getTable("unitData")
+
+    -- If leader not hovered, get leader GUID from mini data to get unit data
+    if not unitData then
+      local unitLeader = getObjectFromGUID(rangeSourceObject.getVar("leaderGUID"))
+      if not unitLeader then
+        return 
+      end
+      unitData = unitLeader.getTable("unitData")
+      if not unitData then
+        return 
+      end
+    end
+
+    local baseSize = unitData.baseSize
+    local rulerBundleTable = getRangeRulerLinks()
+    rulerBundleToSpawn = rulerBundleTable[baseSize] 
+  end
+
+  basePos = rangeSourceObject.getPosition()
+  baseRot = rangeSourceObject.getRotation()
+
+  rangeRuler = spawnObject({
+    type = "Custom_AssetBundle",
+    position = {basePos.x, basePos.y + 20, basePos.z},
+    rotation = {90, baseRot.y, 0},
+    scale = {0,0,0} -- 0 scale will hide TTS default box and won't impact projector
+  })
+
+  rangeRuler.setCustomObject({
+    type = 0,
+    assetbundle = rulerBundleToSpawn
+  })
+
+  rangeRuler.setLock(true)
+  rangeRuler.setName("Range Ruler")
+  luaScript = "targetGUID = '"..rangeSourceObject.getGUID().."'\n function onFixedUpdate()\nif targetGUID ~= nil then\n targetObj = getObjectFromGUID(targetGUID)\n local targetPosition = targetObj.getPosition()\n self.setPosition({targetPosition.x, targetPosition.y + 20, targetPosition.z})\n self.setRotation({0,targetObj.getRotation().y,0})\n end\n end"
+  rangeRuler.setLuaScript(luaScript)
+
+  noRulers = false
+end
